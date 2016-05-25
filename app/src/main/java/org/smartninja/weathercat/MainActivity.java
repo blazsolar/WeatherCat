@@ -62,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private void requestCities() {
 
         String cityIds = TextUtils.join(",", new Integer[] {
-                3239318
+                3239318, 3186843, 3192062, 3197378, 3194351, 3198647, 3192241, 3195506, 5128638,
+                1689973, 3186886, 2759794, 5056033, 2950159, 2988507, 292223, 1609350, 1138958
         });
 
         HttpUrl url = new HttpUrl.Builder()
