@@ -93,9 +93,11 @@ public class CityListFragment extends Fragment {
 
             List<Long> ids = new ArrayList<>();
 
+            int city_id_index = cursor.getColumnIndex("city_id");
+
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                ids.add(cursor.getLong(cursor.getColumnIndex("city_id")));
+                ids.add(cursor.getLong(city_id_index));
                 cursor.moveToNext();
             }
 
