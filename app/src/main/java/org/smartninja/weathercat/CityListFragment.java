@@ -1,9 +1,9 @@
 package org.smartninja.weathercat;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -14,16 +14,18 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.gson.Gson;
-import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.smartninja.weathercat.db.MySQLiteHelper;
 import org.smartninja.weathercat.model.Cities;
 import org.smartninja.weathercat.model.WeatherData;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by blaz on 26/05/16.
@@ -32,8 +34,6 @@ import java.io.IOException;
 public class CityListFragment extends Fragment {
 
     private FavoritePlacesAdapter adapter;
-
-    private final OkHttpClient client = new OkHttpClient();
 
     private ShowDetail detailInterface;
 
@@ -71,46 +71,70 @@ public class CityListFragment extends Fragment {
             }
         });
 
-        requestCities();
+        new LoadTask(getContext()).execute();
     }
 
-    private void requestCities() {
+    private class LoadTask extends AsyncTask<Void, Void, Cities> {
 
-        String cityIds = TextUtils.join(",", new Integer[] {
-                3239318, 3186843, 3192062, 3197378, 3194351, 3198647, 3192241, 3195506, 5128638,
-                1689973, 3186886, 2759794, 5056033, 2950159, 2988507, 292223, 1609350, 1138958
-        });
+        private final OkHttpClient client = new OkHttpClient();
+        private final Context context;
 
-        HttpUrl url = new HttpUrl.Builder()
-                .scheme("http")
-                .host("api.openweathermap.org")
-                .addPathSegment("/data/2.5/group")
-                .addQueryParameter("id", cityIds)
-                .addQueryParameter("units", "metric")
-                .addQueryParameter("appid", "264eb32663a1e4e9cb406b10f7186248")
-                .build();
+        public LoadTask(Context context) {
+            this.context = context;
+        }
 
+        @Override protected Cities doInBackground(Void... params) {
 
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
+            MySQLiteHelper mySQLiteHelper = new MySQLiteHelper(context);
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                e.printStackTrace();
+            Cursor cursor = mySQLiteHelper
+                    .getReadableDatabase()
+                    .query("cities", new String[]{"city_id"}, null, null, null, null, "_id ASC");
+
+            List<Long> ids = new ArrayList<>();
+
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                ids.add(cursor.getLong(cursor.getColumnIndex("city_id")));
+                cursor.moveToNext();
             }
 
-            @Override
-            public void onResponse(Response response) throws IOException {
+            String cityIds = TextUtils.join(",", ids);
+
+            HttpUrl url = new HttpUrl.Builder()
+                    .scheme("http")
+                    .host("api.openweathermap.org")
+                    .addPathSegment("/data/2.5/group")
+                    .addQueryParameter("id", cityIds)
+                    .addQueryParameter("units", "metric")
+                    .addQueryParameter("appid", "264eb32663a1e4e9cb406b10f7186248")
+                    .build();
+
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                 Gson gson = new Gson();
-                Cities cities = gson.fromJson(response.body().string(), Cities.class);
-                adapter.setData(cities.getList());
+                return gson.fromJson(response.body().string(), Cities.class);
+            } catch (IOException e) {
+                return null;
             }
-        });
 
+        }
+
+        @Override protected void onPostExecute(Cities cities) {
+            if (cities != null) {
+                adapter.setData(cities.getList());
+            } else {
+                adapter.setData(null);
+            }
+        }
     }
 
 }
