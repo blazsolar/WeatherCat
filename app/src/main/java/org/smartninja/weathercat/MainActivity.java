@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TextView;
 
 import org.smartninja.weathercat.model.WeatherData;
 
@@ -19,6 +18,7 @@ public class MainActivity extends AppCompatActivity implements ShowDetail {
         setContentView(R.layout.activity_main);
 
         isLandscape = findViewById(R.id.content) != null;
+
     }
 
     @Override

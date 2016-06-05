@@ -1,9 +1,13 @@
 package org.smartninja.weathercat;
 
+import android.app.AlarmManager;
 import android.app.Fragment;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +18,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
 import org.smartninja.weathercat.model.WeatherData;
+import org.smartninja.weathercat.service.FavoriteService;
 
 /**
  * Created by blaz on 26/05/16.
@@ -53,16 +58,27 @@ public class CityDetailFragment extends Fragment {
             @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 SharedPreferences preferences = getContext().getSharedPreferences("weathercat", Context.MODE_PRIVATE);
 
+                AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+                Intent intent = new Intent(getContext(), FavoriteService.class);
+                PendingIntent pendingIntent = PendingIntent.getService(getContext(), 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
                 if (isChecked) {
                     preferences.edit()
                             .putLong("cities", weatherData.getId())
                             .apply();
+
+                        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000, 60 * 1000, pendingIntent);
                 } else {
                     preferences.edit()
                             .remove("cities")
                             .apply();
+
+
+                    alarmManager.cancel(pendingIntent);
                 }
             }
         });
     }
+
+
 }
