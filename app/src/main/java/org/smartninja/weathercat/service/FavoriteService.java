@@ -2,7 +2,6 @@ package org.smartninja.weathercat.service;
 
 import android.app.IntentService;
 import android.app.Notification;
-import android.app.Notification.Action;
 import android.app.Notification.BigTextStyle;
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
@@ -33,14 +32,20 @@ import java.lang.reflect.Method;
 public class FavoriteService extends IntentService {
 
     private final OkHttpClient client = new OkHttpClient();
+    private SharedPreferences preferences;
 
     public FavoriteService() {
         super("FavoriteCity");
     }
 
+    @Override public void onCreate() {
+        super.onCreate();
+
+        preferences = getSharedPreferences("weathercat", Context.MODE_PRIVATE);
+    }
+
     @Override protected void onHandleIntent(Intent intent) {
 
-        SharedPreferences preferences = getSharedPreferences("weathercat", Context.MODE_PRIVATE);
         long cityId = preferences.getLong("cities", -1);
 
         if (cityId != -1) {
@@ -95,7 +100,8 @@ public class FavoriteService extends IntentService {
 
         Intent intent = new Intent(this, SecondActivity.class);
         intent.putExtra(CityDetailFragment.EXTRA_WEATHER_DATA, data);
-        builder.setContentIntent(PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+        PendingIntent activity = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(activity);
 
         notificationManager.notify(1, builder.build());
 
@@ -108,7 +114,7 @@ public class FavoriteService extends IntentService {
         try {
             Object service = getSystemService("statusbar");
             Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
-            Method expand = statusbarManager.getMethod( "expand" );
+            Method expand = statusbarManager.getMethod("expand");
             expand.invoke( service );
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
             e.printStackTrace();

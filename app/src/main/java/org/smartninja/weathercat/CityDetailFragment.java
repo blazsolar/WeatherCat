@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,7 +66,7 @@ public class CityDetailFragment extends Fragment {
                             .putLong("cities", weatherData.getId())
                             .apply();
 
-                        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10 * 1000, 60 * 1000, pendingIntent);
+                        alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis() + 10 * 1000, 60 * 1000, pendingIntent);
                 } else {
                     preferences.edit()
                             .remove("cities")

@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.smartninja.weathercat.service.FavoriteService;
 
@@ -17,7 +16,7 @@ import org.smartninja.weathercat.service.FavoriteService;
 public class BootReceiver extends BroadcastReceiver {
 
     @Override public void onReceive(Context context, Intent intent) {
-        Log.d("BootReceiver", "Booted");
+
         SharedPreferences preferences = context.getSharedPreferences("weathercat", Context.MODE_PRIVATE);
         long cityId = preferences.getLong("cities", -1);
 
