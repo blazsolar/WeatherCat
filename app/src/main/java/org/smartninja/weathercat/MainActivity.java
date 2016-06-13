@@ -19,6 +19,15 @@ public class MainActivity extends AppCompatActivity implements ShowDetail {
 
         isLandscape = findViewById(R.id.content) != null;
 
+        if (savedInstanceState != null) {
+            Fragment fragment = getFragmentManager().findFragmentById(R.id.content);
+            if (!isLandscape && fragment != null) {
+                getFragmentManager().beginTransaction()
+                        .remove(fragment)
+                        .commit();
+            }
+        }
+
     }
 
     @Override

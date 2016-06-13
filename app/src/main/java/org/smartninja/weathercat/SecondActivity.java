@@ -1,12 +1,8 @@
 package org.smartninja.weathercat;
 
 import android.app.Fragment;
-import android.content.res.Resources;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.TextView;
-
-import org.smartninja.weathercat.model.WeatherData;
+import android.support.v7.app.AppCompatActivity;
 
 public class SecondActivity extends AppCompatActivity {
 
@@ -21,8 +17,10 @@ public class SecondActivity extends AppCompatActivity {
         Fragment fragment = new CityDetailFragment();
         fragment.setArguments(arguments);
 
-        getFragmentManager().beginTransaction()
-                .add(android.R.id.content, fragment)
-                .commit();
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(android.R.id.content, fragment)
+                    .commit();
+        }
     }
 }

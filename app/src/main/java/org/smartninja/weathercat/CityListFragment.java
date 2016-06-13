@@ -2,12 +2,16 @@ package org.smartninja.weathercat;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -58,6 +62,8 @@ public class CityListFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        setHasOptionsMenu(true);
+
         adapter = new FavoritePlacesAdapter(getActivity());
         ListView listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(adapter);
@@ -70,8 +76,23 @@ public class CityListFragment extends Fragment {
 
             }
         });
-
+        
         new LoadTask(getContext()).execute();
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_list, menu);
+    }
+
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_location:
+                Intent intent = new Intent(getContext(), CurrentLocationActivity.class);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private class LoadTask extends AsyncTask<Void, Void, Cities> {
